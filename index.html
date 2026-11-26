@@ -28,7 +28,8 @@ small,.hint{color:var(--muted);font-size:12px;line-height:1.5}.notice{padding:11
 hr{border:0;border-top:1px solid var(--line);margin:4px 0}
 footer{max-width:1120px;margin:0 auto;padding:0 18px 24px;color:var(--muted);font-size:12px}
 @media(max-width:760px){main{grid-template-columns:1fr;padding:12px}.preview{min-height:290px}.panel{padding:13px}header{padding:17px 16px}}
-</style></head>
+</style><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
 <body>
 <header><h1>2DS Custom Studio</h1><p>Personaliza las pegatinas de tu New Nintendo 2DS XL</p></header>
 <main>
@@ -44,9 +45,12 @@ footer{max-width:1120px;margin:0 auto;padding:0 18px 24px;color:var(--muted);fon
 <div class="field"><label for="rotate">Rotación</label><input id="rotate" type="range" min="-180" max="180" value="0"></div>
 <div class="row"><button id="center">Centrar imagen</button><button id="clear">Quitar imagen</button></div>
 <hr>
-<button class="primary" id="export">Descargar PNG de la pieza seleccionada</button>
-<small>El PNG se exporta con fondo transparente fuera de la silueta. Para mover la imagen, arrástrala dentro de la tapa en la vista previa.</small>
-<div class="notice"><b>Antes de imprimir:</b> esta primera versión usa siluetas aproximadas reconstruidas visualmente. No son plantillas dimensionales verificadas. Haz una prueba en papel y mide/ajusta el contorno antes de cortar vinilo.</div>
+<div class="field"><label for="printWidth">Ancho de impresión (mm)</label><input id="printWidth" type="number" min="10" max="200" value="150"></div>
+<div class="field"><label for="printHeight">Alto de impresión (mm)</label><input id="printHeight" type="number" min="10" max="200" value="60"></div>
+<button class="primary" id="exportPdf">Crear plantilla PDF de la pieza seleccionada</button>
+<button id="export">Descargar PNG de la pieza seleccionada</button>
+<small>El PDF se genera en A4 con las medidas en milímetros que configures. Para mover la imagen, arrástrala dentro de la tapa en la vista previa.</small>
+<div class="notice"><b>Antes de imprimir:</b> esta primera versión usa siluetas aproximadas reconstruidas visualmente. Las siluetas son aproximadas y las medidas iniciales (150 × 60 mm) son solo valores de partida, no medidas verificadas. Mide tu tapa, ajusta ancho/alto y prueba en papel antes de cortar vinilo. Imprime al 100%.</div>
 </div></section>
 </main><footer>2DS Custom Studio · Proyecto comunitario independiente. No afiliado a Nintendo.</footer>
 <script>
@@ -84,5 +88,6 @@ $('export').onclick=()=>{
  else{path.moveTo(70,30);path.lineTo(1730,30);path.quadraticCurveTo(1770,30,1770,75);path.lineTo(1770,825);path.quadraticCurveTo(1770,870,1730,870);path.lineTo(70,870);path.quadraticCurveTo(30,870,30,825);path.lineTo(30,75);path.quadraticCurveTo(30,30,70,30);path.closePath();}
  ctx.save();ctx.clip(path);const im=new Image();im.onload=()=>{const scale=Math.max(W/im.width,H/im.height)*s.zoom/100;const iw=im.width*scale,ih=im.height*scale;ctx.translate(W/2+s.x*W/390,H/2+s.y*H/200);ctx.rotate(s.rotate*Math.PI/180);ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();const a=document.createElement('a');a.download='2ds-custom-'+active+'.png';a.href=c.toDataURL('image/png');a.click()};im.onerror=()=>alert('No se pudo cargar la imagen.');im.src=s.img;
 };
+$('exportPdf').onclick=()=>{const s=current();if(!s.img)return alert('Primero sube una imagen para esta tapa.');if(!window.jspdf)return alert('No se pudo cargar el generador PDF. Comprueba tu conexión.');const W=1800,H=900,c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');const path=new Path2D();if(active==='top'){path.roundRect(30,30,1740,840,[115,115,70,70]);}else{path.moveTo(70,30);path.lineTo(1730,30);path.quadraticCurveTo(1770,30,1770,75);path.lineTo(1770,825);path.quadraticCurveTo(1770,870,1730,870);path.lineTo(70,870);path.quadraticCurveTo(30,870,30,825);path.lineTo(30,75);path.quadraticCurveTo(30,30,70,30);path.closePath();}ctx.save();ctx.clip(path);const im=new Image();im.onload=()=>{const scale=Math.max(W/im.width,H/im.height)*s.zoom/100,iw=im.width*scale,ih=im.height*scale;ctx.translate(W/2+s.x*W/390,H/2+s.y*H/200);ctx.rotate(s.rotate*Math.PI/180);ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();const width=Number($('printWidth').value),height=Number($('printHeight').value);if(!(width>=10&&height>=10&&width<=200&&height<=200))return alert('Introduce medidas entre 10 y 200 mm.');const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});const x=(210-width)/2,y=(297-height)/2;pdf.setFontSize(11);pdf.text('New Nintendo 2DS XL - '+active.toUpperCase(),12,12);pdf.addImage(c.toDataURL('image/png'),'PNG',x,y,width,height,undefined,'FAST');pdf.setDrawColor(120);pdf.setLineDashPattern([2,2],0);pdf.rect(x,y,width,height);pdf.setLineDashPattern([],0);pdf.setFontSize(8);pdf.text('Imprimir al 100% / tamaño real. Desactivar ajustar a página.',12,285);pdf.text('Medida configurada: '+width+' x '+height+' mm. Verificar con prueba en papel.',12,290);pdf.save('2ds-custom-'+active+'.pdf');};im.onerror=()=>alert('No se pudo cargar la imagen.');im.src=s.img;};
 draw();
 </script></body></html>
