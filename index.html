@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#171923"><title>2DS Custom Studio</title>
+<style>
+:root{color-scheme:dark;--bg:#10121a;--panel:#1a1e2a;--line:#303747;--muted:#aab2c2;--accent:#8b7cff}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f6f7fb;font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:20px max(18px,calc((100vw - 1120px)/2));border-bottom:1px solid var(--line);background:#151824}
+h1{font-size:22px;margin:0 0 4px}header p{margin:0;color:var(--muted);font-size:13px}
+main{max-width:1120px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
+h2{font-size:16px;margin:0 0 14px}.preview{background:linear-gradient(135deg,#252b3b,#171b26);border-radius:14px;padding:18px;display:grid;place-items:center;min-height:360px}
+.device{width:min(100%,390px);aspect-ratio:1.18;position:relative;display:grid;grid-template-rows:1fr .88fr;gap:12px;filter:drop-shadow(0 12px 16px #0008)}
+.shell{position:relative;overflow:hidden;background:#d5d8e0;border:5px solid #858b98;border-radius:22px;display:grid;place-items:center}
+.shell.top{border-radius:24px 24px 15px 15px}.shell.bottom{border-radius:15px 15px 24px 24px}
+.art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.96;pointer-events:none}
+.shell.active{outline:3px solid var(--accent);outline-offset:3px}
+.shell:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid #ffffff55;border-radius:inherit}
+.placeholder{color:#333b4b;font-size:12px;font-weight:700;letter-spacing:2px;z-index:1;text-align:center}
+.device-label{position:absolute;right:0;top:-20px;font-size:10px;color:#d2d6e2}
+.controls{display:grid;gap:12px}.field{display:grid;gap:6px}label{font-size:13px;color:#dce1ec}input,select,button{font:inherit}input[type=file]{width:100%;padding:10px;background:#111520;border:1px dashed #505b72;border-radius:10px;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--accent)}
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
+button{border:1px solid var(--line);background:#252b3b;color:#fff;border-radius:11px;padding:11px 12px;font-weight:650;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#100d25}button:active{transform:scale(.99)}
+small,.hint{color:var(--muted);font-size:12px;line-height:1.5}.notice{padding:11px;border-radius:11px;background:#2a261b;border:1px solid #66552c;color:#f1dca8;font-size:12px;line-height:1.5}
+hr{border:0;border-top:1px solid var(--line);margin:4px 0}
+footer{max-width:1120px;margin:0 auto;padding:0 18px 24px;color:var(--muted);font-size:12px}
+@media(max-width:760px){main{grid-template-columns:1fr;padding:12px}.preview{min-height:290px}.panel{padding:13px}header{padding:17px 16px}}
+</style></head>
+<body>
+<header><h1>2DS Custom Studio</h1><p>Personaliza las pegatinas de tu New Nintendo 2DS XL</p></header>
+<main>
+<section class="panel"><h2>Vista previa</h2><div class="preview"><div class="device" id="device">
+<div class="device-label">VISTA PREVIA · NO A ESCALA</div>
+<div class="shell top active" id="topShell"><span class="placeholder">TAPA SUPERIOR</span></div>
+<div class="shell bottom" id="bottomShell"><span class="placeholder">TAPA INFERIOR</span></div>
+</div></div><p class="hint">Toca una tapa para seleccionarla. La vista es ilustrativa; no representa el contorno técnico exacto.</p></section>
+<section class="panel"><h2>Tu diseño</h2><div class="controls">
+<div class="field"><label for="imageInput">1. Sube una imagen</label><input id="imageInput" type="file" accept="image/*"><small>Formatos habituales: JPG, PNG y WebP.</small></div>
+<div class="field"><label for="piece">2. Pieza que quieres editar</label><select id="piece"><option value="top">Tapa superior (TOP)</option><option value="bottom">Tapa inferior (BOTTOM)</option></select></div>
+<div class="field"><label for="zoom">Tamaño de imagen</label><input id="zoom" type="range" min="50" max="250" value="100"></div>
+<div class="field"><label for="rotate">Rotación</label><input id="rotate" type="range" min="-180" max="180" value="0"></div>
+<div class="row"><button id="center">Centrar imagen</button><button id="clear">Quitar imagen</button></div>
+<hr>
+<button class="primary" id="export">Descargar PNG de la pieza seleccionada</button>
+<small>El PNG se exporta con fondo transparente fuera de la silueta. Para mover la imagen, arrástrala dentro de la tapa en la vista previa.</small>
+<div class="notice"><b>Antes de imprimir:</b> esta primera versión usa siluetas aproximadas reconstruidas visualmente. No son plantillas dimensionales verificadas. Haz una prueba en papel y mide/ajusta el contorno antes de cortar vinilo.</div>
+</div></section>
+</main><footer>2DS Custom Studio · Proyecto comunitario independiente. No afiliado a Nintendo.</footer>
+<script>
+const state={top:{img:null,x:0,y:0,zoom:100,rotate:0},bottom:{img:null,x:0,y:0,zoom:100,rotate:0}};
+const $=id=>document.getElementById(id);let active='top',drag=null;
+const shells={top:$('topShell'),bottom:$('bottomShell')};
+function current(){return state[active]}
+function draw(){
+ for(const key of ['top','bottom']){
+  const sh=shells[key],s=state[key];sh.classList.toggle('active',key===active);
+  sh.querySelectorAll('.art').forEach(n=>n.remove());
+  sh.querySelectorAll('.placeholder').forEach(n=>n.style.display=s.img?'none':'block');
+  if(s.img){const im=document.createElement('img');im.className='art';im.src=s.img;im.style.objectFit='cover';im.style.transform='translate('+s.x+'px,'+s.y+'px) scale('+s.zoom/100+') rotate('+s.rotate+'deg)';sh.appendChild(im)}
+ }
+ $('piece').value=active;$('zoom').value=current().zoom;$('rotate').value=current().rotate;
+}
+function setActive(k){active=k;draw()}
+shells.top.addEventListener('click',()=>setActive('top'));shells.bottom.addEventListener('click',()=>setActive('bottom'));
+$('piece').addEventListener('change',e=>setActive(e.target.value));
+$('imageInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('Selecciona un archivo de imagen.');const u=URL.createObjectURL(f);current().img=u;current().x=0;current().y=0;draw()});
+$('zoom').addEventListener('input',e=>{current().zoom=+e.target.value;draw()});
+$('rotate').addEventListener('input',e=>{current().rotate=+e.target.value;draw()});
+$('center').onclick=()=>{current().x=0;current().y=0;draw()};
+$('clear').onclick=()=>{current().img=null;draw()};
+for(const [k,el] of Object.entries(shells)){
+ el.addEventListener('pointerdown',e=>{if(k!==active||!current().img)return;drag={key:k,x:e.clientX,y:e.clientY,ox:current().x,oy:current().y};el.setPointerCapture(e.pointerId)});
+ el.addEventListener('pointermove',e=>{if(!drag||drag.key!==k)return;current().x=drag.ox+(e.clientX-drag.x);current().y=drag.oy+(e.clientY-drag.y);draw()});
+ el.addEventListener('pointerup',()=>drag=null);el.addEventListener('pointercancel',()=>drag=null);
+}
+$('export').onclick=()=>{
+ const s=current();if(!s.img)return alert('Primero sube una imagen para esta tapa.');
+ const W=1800,H=900,c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');
+ const path=new Path2D();
+ if(active==='top'){path.roundRect(30,30,1740,840,[115,115,70,70]);}
+ else{path.moveTo(70,30);path.lineTo(1730,30);path.quadraticCurveTo(1770,30,1770,75);path.lineTo(1770,825);path.quadraticCurveTo(1770,870,1730,870);path.lineTo(70,870);path.quadraticCurveTo(30,870,30,825);path.lineTo(30,75);path.quadraticCurveTo(30,30,70,30);path.closePath();}
+ ctx.save();ctx.clip(path);const im=new Image();im.onload=()=>{const scale=Math.max(W/im.width,H/im.height)*s.zoom/100;const iw=im.width*scale,ih=im.height*scale;ctx.translate(W/2+s.x*W/390,H/2+s.y*H/200);ctx.rotate(s.rotate*Math.PI/180);ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();const a=document.createElement('a');a.download='2ds-custom-'+active+'.png';a.href=c.toDataURL('image/png');a.click()};im.onerror=()=>alert('No se pudo cargar la imagen.');im.src=s.img;
+};
+draw();
+</script></body></html>
