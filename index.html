@@ -66,7 +66,7 @@ footer{max-width:1180px;margin:auto;padding:0 18px 25px;color:var(--muted);font-
  <b>Dimensiones de impresión de la pieza seleccionada</b>
  <div class="row">
   <div class="field"><label for="printWidth">Ancho (mm)</label><input id="printWidth" type="number" min="10" max="190" step="0.1" value="150"></div>
-  <div class="field"><label for="printHeight">Alto (mm)</label><input id="printHeight" type="number" min="10" max="270" step="0.1" value="60"></div>
+  <div class="field"><label for="printHeight">Alto (mm)</label><input id="printHeight" type="number" min="10" max="180" step="0.1" value="60"></div>
  </div>
  <div class="field"><label for="corner">Radio de esquinas (mm)</label><input id="corner" type="number" min="0" max="40" step="0.1" value="5"></div>
  <small>TOP y BOTTOM guardan dimensiones y radios por separado. Los valores iniciales son orientativos, no cotas oficiales del JAN-001.</small>
@@ -147,8 +147,8 @@ $('center').onclick=()=>{current().panX=0;current().panY=0;draw()};
 $('clear').onclick=()=>{if(current().img)URL.revokeObjectURL(current().img);current().img=null;draw()};
 function validatePiece(key){
  const s=state[key];
- if(!(Number.isFinite(s.width)&&s.width>=10&&s.width<=190&&Number.isFinite(s.height)&&s.height>=10&&s.height<=270&&Number.isFinite(s.radius)&&s.radius>=0&&s.radius<=Math.min(s.width,s.height)/2)){
-  alert('Revisa las dimensiones y el radio. Ancho: 10–190 mm; alto: 10–270 mm; radio: hasta la mitad del lado menor.');return false;
+ if(!(Number.isFinite(s.width)&&s.width>=10&&s.width<=190&&Number.isFinite(s.height)&&s.height>=10&&s.height<=180&&Number.isFinite(s.radius)&&s.radius>=0&&s.radius<=Math.min(s.width,s.height)/2)){
+  alert('Revisa las dimensiones y el radio. Ancho: 10–190 mm; alto: 10–180 mm; radio: hasta la mitad del lado menor.');return false;
  }
  if(s.width>190||s.height>270){alert('La pieza no cabe en A4 con los márgenes reservados.');return false;}
  return true;
@@ -175,7 +175,7 @@ function makePieceCanvas(key){
 async function addPdfPage(pdf,key){
  const s=state[key];if(!validatePiece(key))throw new Error('Medidas inválidas.');
  const canvas=await makePieceCanvas(key),pageW=210,pageH=297;
- const x=(pageW-s.width)/2,y=105-s.height/2;
+ const x=(pageW-s.width)/2,y=35+(180-s.height)/2;
  pdf.setFont('helvetica','bold');pdf.setFontSize(14);pdf.text('2DS CUSTOM STUDIO - '+key.toUpperCase(),12,14);
  pdf.setFont('helvetica','normal');pdf.setFontSize(9);
  pdf.text('New Nintendo 2DS XL · JAN-001 · plantilla ajustable',12,21);
