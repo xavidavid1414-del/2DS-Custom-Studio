@@ -1,93 +1,210 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#171923"><title>2DS Custom Studio</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#111522">
+<title>2DS Custom Studio</title>
 <style>
-:root{color-scheme:dark;--bg:#10121a;--panel:#1a1e2a;--line:#303747;--muted:#aab2c2;--accent:#8b7cff}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f6f7fb;font:15px system-ui,-apple-system,Segoe UI,sans-serif}
-header{padding:20px max(18px,calc((100vw - 1120px)/2));border-bottom:1px solid var(--line);background:#151824}
-h1{font-size:22px;margin:0 0 4px}header p{margin:0;color:var(--muted);font-size:13px}
-main{max-width:1120px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(290px,.85fr);gap:18px}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px;min-width:0}
-h2{font-size:16px;margin:0 0 14px}.preview{background:linear-gradient(135deg,#252b3b,#171b26);border-radius:14px;padding:18px;display:grid;place-items:center;min-height:360px}
-.device{width:min(100%,390px);aspect-ratio:1.18;position:relative;display:grid;grid-template-rows:1fr .88fr;gap:12px;filter:drop-shadow(0 12px 16px #0008)}
-.shell{position:relative;overflow:hidden;background:#d5d8e0;border:5px solid #858b98;border-radius:22px;display:grid;place-items:center}
-.shell.top{border-radius:24px 24px 15px 15px}.shell.bottom{border-radius:15px 15px 24px 24px}
-.art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.96;pointer-events:none}
+:root{color-scheme:dark;--bg:#10131c;--panel:#1b2030;--line:#343d52;--muted:#aab4c8;--accent:#8d80ff;--good:#9ad8b0}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#f5f6fb;font:15px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:20px max(18px,calc((100vw - 1180px)/2));background:#171c29;border-bottom:1px solid var(--line)}
+h1{font-size:23px;margin:0 0 4px}header p{margin:0;color:var(--muted);font-size:13px}
+main{max-width:1180px;margin:auto;padding:18px;display:grid;grid-template-columns:minmax(0,1.1fr) minmax(310px,.9fr);gap:18px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:17px;padding:16px;min-width:0}
+h2{font-size:16px;margin:0 0 13px}
+.preview{display:grid;gap:14px;background:#151a27;padding:15px;border-radius:13px}
+.piece-preview{display:grid;gap:6px}
+.piece-title{display:flex;justify-content:space-between;color:#cbd3e3;font-size:12px}
+.shell{height:142px;position:relative;overflow:hidden;display:grid;place-items:center;background:#e2e5ed;border:2px solid #8790a3;touch-action:none;user-select:none}
+.shell.top{border-radius:22px 22px 13px 13px}
+.shell.bottom{border-radius:13px 13px 22px 22px}
 .shell.active{outline:3px solid var(--accent);outline-offset:3px}
-.shell:after{content:"";position:absolute;inset:0;pointer-events:none;border:1px solid #ffffff55;border-radius:inherit}
-.placeholder{color:#333b4b;font-size:12px;font-weight:700;letter-spacing:2px;z-index:1;text-align:center}
-.device-label{position:absolute;right:0;top:-20px;font-size:10px;color:#d2d6e2}
-.controls{display:grid;gap:12px}.field{display:grid;gap:6px}label{font-size:13px;color:#dce1ec}input,select,button{font:inherit}input[type=file]{width:100%;padding:10px;background:#111520;border:1px dashed #505b72;border-radius:10px;color:var(--muted)}
+.art{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;transform-origin:center}
+.placeholder{color:#354057;font-size:12px;font-weight:750;letter-spacing:2px;z-index:1}
+.hint,.muted,small{color:var(--muted);font-size:12px;line-height:1.5}
+.controls{display:grid;gap:12px}
+.field{display:grid;gap:6px}
+label{font-size:13px;color:#dce2ee}
+input,select,button{font:inherit}
+input[type=file],input[type=number],select{width:100%;padding:10px;background:#111622;border:1px solid #414b62;border-radius:10px;color:#f5f6fb}
 input[type=range]{width:100%;accent-color:var(--accent)}
-.row{display:flex;gap:8px;align-items:center}.row>*{flex:1}
-button{border:1px solid var(--line);background:#252b3b;color:#fff;border-radius:11px;padding:11px 12px;font-weight:650;cursor:pointer}
-button.primary{background:var(--accent);border-color:var(--accent);color:#100d25}button:active{transform:scale(.99)}
-small,.hint{color:var(--muted);font-size:12px;line-height:1.5}.notice{padding:11px;border-radius:11px;background:#2a261b;border:1px solid #66552c;color:#f1dca8;font-size:12px;line-height:1.5}
-hr{border:0;border-top:1px solid var(--line);margin:4px 0}
-footer{max-width:1120px;margin:0 auto;padding:0 18px 24px;color:var(--muted);font-size:12px}
-@media(max-width:760px){main{grid-template-columns:1fr;padding:12px}.preview{min-height:290px}.panel{padding:13px}header{padding:17px 16px}}
-</style><script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+.row{display:flex;gap:8px;align-items:center}.row>*{flex:1;min-width:0}
+button{border:1px solid var(--line);background:#293147;color:#fff;border-radius:10px;padding:11px 12px;font-weight:650;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#100e25}
+button:active{transform:scale(.99)}
+hr{border:0;border-top:1px solid var(--line);margin:3px 0}
+.notice{padding:11px;border-radius:11px;background:#2b281d;border:1px solid #66582e;color:#f1dfae;font-size:12px;line-height:1.5}
+.ok{padding:10px;border:1px solid #315b46;background:#192b23;border-radius:10px;color:var(--good);font-size:12px;line-height:1.45}
+footer{max-width:1180px;margin:auto;padding:0 18px 25px;color:var(--muted);font-size:12px}
+@media(max-width:780px){main{grid-template-columns:1fr;padding:12px}header{padding:17px 15px}.panel{padding:13px}.shell{height:120px}}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body>
-<header><h1>2DS Custom Studio</h1><p>Personaliza las pegatinas de tu New Nintendo 2DS XL</p></header>
+<header><h1>2DS Custom Studio</h1><p>Diseña e imprime plantillas para New Nintendo 2DS XL · JAN-001</p></header>
 <main>
-<section class="panel"><h2>Vista previa</h2><div class="preview"><div class="device" id="device">
-<div class="device-label">VISTA PREVIA · NO A ESCALA</div>
-<div class="shell top active" id="topShell"><span class="placeholder">TAPA SUPERIOR</span></div>
-<div class="shell bottom" id="bottomShell"><span class="placeholder">TAPA INFERIOR</span></div>
-</div></div><p class="hint">Toca una tapa para seleccionarla. La vista es ilustrativa; no representa el contorno técnico exacto.</p></section>
-<section class="panel"><h2>Tu diseño</h2><div class="controls">
-<div class="field"><label for="imageInput">1. Sube una imagen</label><input id="imageInput" type="file" accept="image/*"><small>Formatos habituales: JPG, PNG y WebP.</small></div>
-<div class="field"><label for="piece">2. Pieza que quieres editar</label><select id="piece"><option value="top">Tapa superior (TOP)</option><option value="bottom">Tapa inferior (BOTTOM)</option></select></div>
-<div class="field"><label for="zoom">Tamaño de imagen</label><input id="zoom" type="range" min="50" max="250" value="100"></div>
-<div class="field"><label for="rotate">Rotación</label><input id="rotate" type="range" min="-180" max="180" value="0"></div>
-<div class="row"><button id="center">Centrar imagen</button><button id="clear">Quitar imagen</button></div>
-<hr>
-<div class="field"><label for="printWidth">Ancho de impresión (mm)</label><input id="printWidth" type="number" min="10" max="200" value="150"></div>
-<div class="field"><label for="printHeight">Alto de impresión (mm)</label><input id="printHeight" type="number" min="10" max="200" value="60"></div>
-<button class="primary" id="exportPdf">Crear plantilla PDF de la pieza seleccionada</button>
-<button id="export">Descargar PNG de la pieza seleccionada</button>
-<small>El PDF se genera en A4 con las medidas en milímetros que configures. Para mover la imagen, arrástrala dentro de la tapa en la vista previa.</small>
-<div class="notice"><b>Antes de imprimir:</b> esta primera versión usa siluetas aproximadas reconstruidas visualmente. Las siluetas son aproximadas y las medidas iniciales (150 × 60 mm) son solo valores de partida, no medidas verificadas. Mide tu tapa, ajusta ancho/alto y prueba en papel antes de cortar vinilo. Imprime al 100%.</div>
-</div></section>
-</main><footer>2DS Custom Studio · Proyecto comunitario independiente. No afiliado a Nintendo.</footer>
+<section class="panel">
+<h2>Vista previa de las dos piezas</h2>
+<div class="preview">
+ <div class="piece-preview"><div class="piece-title"><b>TOP · Tapa superior</b><span>Seleccionar para editar</span></div><div class="shell top active" id="topShell"><span class="placeholder">TOP</span></div></div>
+ <div class="piece-preview"><div class="piece-title"><b>BOTTOM · Tapa inferior</b><span>Seleccionar para editar</span></div><div class="shell bottom" id="bottomShell"><span class="placeholder">BOTTOM</span></div></div>
+</div>
+<p class="hint">Selecciona una pieza. Puedes cargar una imagen distinta para TOP y BOTTOM, arrastrarla dentro de la vista previa y ajustar su escala y rotación.</p>
+<div class="ok">El PDF puede generarse con o sin imágenes. Cada pieza ocupa una página A4 y lleva su contorno de corte redondeado y una referencia de calibración de 50 mm.</div>
+</section>
+<section class="panel">
+<h2>Editor de diseño y plantilla</h2>
+<div class="controls">
+ <div class="field"><label for="piece">Pieza seleccionada</label><select id="piece"><option value="top">TOP · Tapa superior</option><option value="bottom">BOTTOM · Tapa inferior</option></select></div>
+ <div class="field"><label for="imageInput">Imagen para esta pieza</label><input id="imageInput" type="file" accept="image/*"><small>JPG, PNG o WebP. Cada pieza conserva su propia imagen.</small></div>
+ <div class="field"><label for="zoom">Escala de imagen</label><input id="zoom" type="range" min="50" max="250" value="100"></div>
+ <div class="field"><label for="rotate">Rotación</label><input id="rotate" type="range" min="-180" max="180" value="0"></div>
+ <div class="row"><button id="center">Centrar imagen</button><button id="clear">Quitar imagen</button></div>
+ <hr>
+ <b>Dimensiones de impresión de la pieza seleccionada</b>
+ <div class="row">
+  <div class="field"><label for="printWidth">Ancho (mm)</label><input id="printWidth" type="number" min="10" max="190" step="0.1" value="150"></div>
+  <div class="field"><label for="printHeight">Alto (mm)</label><input id="printHeight" type="number" min="10" max="270" step="0.1" value="60"></div>
+ </div>
+ <div class="field"><label for="corner">Radio de esquinas (mm)</label><input id="corner" type="number" min="0" max="40" step="0.1" value="5"></div>
+ <small>TOP y BOTTOM guardan dimensiones y radios por separado. Los valores iniciales son orientativos, no cotas oficiales del JAN-001.</small>
+ <hr>
+ <button class="primary" id="pdfBoth">Crear PDF TOP + BOTTOM (2 páginas)</button>
+ <button id="pdfOne">Crear PDF de la pieza seleccionada</button>
+ <button id="png">Exportar diseño PNG</button>
+ <div class="notice"><b>Precisión:</b> Nintendo publica 159 × 86,4 × 20,8 mm para la consola cerrada, pero no publica las dimensiones individuales de TOP y BOTTOM. Por eso las medidas y los radios de esta aplicación son ajustables. El contorno actual es un rectángulo redondeado genérico, no un molde industrial certificado.</div>
+</div>
+</section>
+</main>
+<footer>2DS Custom Studio · Proyecto independiente, no afiliado a Nintendo. Antes de cortar vinilo, imprime al 100% y comprueba el ajuste con papel.</footer>
 <script>
-const state={top:{img:null,x:0,y:0,zoom:100,rotate:0},bottom:{img:null,x:0,y:0,zoom:100,rotate:0}};
-const $=id=>document.getElementById(id);let active='top',drag=null;
+const $=id=>document.getElementById(id);
+const state={
+ top:{img:null,zoom:100,rotate:0,panX:0,panY:0,width:150,height:60,radius:5},
+ bottom:{img:null,zoom:100,rotate:0,panX:0,panY:0,width:150,height:60,radius:5}
+};
+let active='top',drag=null;
 const shells={top:$('topShell'),bottom:$('bottomShell')};
 function current(){return state[active]}
+function setActive(key){active=key;draw();syncFields()}
+function syncFields(){
+ const s=current();
+ $('piece').value=active;$('zoom').value=s.zoom;$('rotate').value=s.rotate;
+ $('printWidth').value=s.width;$('printHeight').value=s.height;$('corner').value=s.radius;
+ $('imageInput').value='';
+}
 function draw(){
- for(const key of ['top','bottom']){
-  const sh=shells[key],s=state[key];sh.classList.toggle('active',key===active);
-  sh.querySelectorAll('.art').forEach(n=>n.remove());
-  sh.querySelectorAll('.placeholder').forEach(n=>n.style.display=s.img?'none':'block');
-  if(s.img){const im=document.createElement('img');im.className='art';im.src=s.img;im.style.objectFit='cover';im.style.transform='translate('+s.x+'px,'+s.y+'px) scale('+s.zoom/100+') rotate('+s.rotate+'deg)';sh.appendChild(im)}
- }
- $('piece').value=active;$('zoom').value=current().zoom;$('rotate').value=current().rotate;
+ ['top','bottom'].forEach(key=>{
+  const shell=shells[key],s=state[key];
+  shell.classList.toggle('active',key===active);
+  const old=shell.querySelector('.art');if(old)old.remove();
+  const placeholder=shell.querySelector('.placeholder');
+  placeholder.style.display=s.img?'none':'block';
+  if(s.img){
+   const img=document.createElement('img');img.className='art';img.src=s.img;
+   img.style.transform='translate('+s.panX+'%,'+s.panY+'%) scale('+s.zoom/100+') rotate('+s.rotate+'deg)';
+   shell.appendChild(img);
+  }
+ });
 }
-function setActive(k){active=k;draw()}
-shells.top.addEventListener('click',()=>setActive('top'));shells.bottom.addEventListener('click',()=>setActive('bottom'));
+shells.top.addEventListener('pointerdown',e=>startDrag('top',e));
+shells.bottom.addEventListener('pointerdown',e=>startDrag('bottom',e));
+function startDrag(key,e){
+ if(key!==active||!current().img)return;
+ const rect=shells[key].getBoundingClientRect();
+ drag={key:key,x:e.clientX,y:e.clientY,ox:current().panX,oy:current().panY,w:rect.width,h:rect.height};
+ shells[key].setPointerCapture(e.pointerId);
+}
+function moveDrag(e){
+ if(!drag)return;
+ const s=state[drag.key];
+ s.panX=drag.ox+(e.clientX-drag.x)/drag.w*100;
+ s.panY=drag.oy+(e.clientY-drag.y)/drag.h*100;
+ draw();
+}
+Object.values(shells).forEach(el=>{
+ el.addEventListener('pointermove',moveDrag);
+ el.addEventListener('pointerup',()=>drag=null);
+ el.addEventListener('pointercancel',()=>drag=null);
+ el.addEventListener('click',()=>{if(el===shells.top)setActive('top');else setActive('bottom')});
+});
 $('piece').addEventListener('change',e=>setActive(e.target.value));
-$('imageInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;if(!f.type.startsWith('image/'))return alert('Selecciona un archivo de imagen.');const u=URL.createObjectURL(f);current().img=u;current().x=0;current().y=0;draw()});
-$('zoom').addEventListener('input',e=>{current().zoom=+e.target.value;draw()});
-$('rotate').addEventListener('input',e=>{current().rotate=+e.target.value;draw()});
-$('center').onclick=()=>{current().x=0;current().y=0;draw()};
-$('clear').onclick=()=>{current().img=null;draw()};
-for(const [k,el] of Object.entries(shells)){
- el.addEventListener('pointerdown',e=>{if(k!==active||!current().img)return;drag={key:k,x:e.clientX,y:e.clientY,ox:current().x,oy:current().y};el.setPointerCapture(e.pointerId)});
- el.addEventListener('pointermove',e=>{if(!drag||drag.key!==k)return;current().x=drag.ox+(e.clientX-drag.x);current().y=drag.oy+(e.clientY-drag.y);draw()});
- el.addEventListener('pointerup',()=>drag=null);el.addEventListener('pointercancel',()=>drag=null);
+$('imageInput').addEventListener('change',e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ if(!file.type.startsWith('image/')){alert('Selecciona un archivo de imagen.');return;}
+ const url=URL.createObjectURL(file);
+ if(current().img)URL.revokeObjectURL(current().img);
+ current().img=url;current().panX=0;current().panY=0;draw();
+});
+$('zoom').addEventListener('input',e=>{current().zoom=Number(e.target.value);draw()});
+$('rotate').addEventListener('input',e=>{current().rotate=Number(e.target.value);draw()});
+$('printWidth').addEventListener('change',e=>current().width=Number(e.target.value));
+$('printHeight').addEventListener('change',e=>current().height=Number(e.target.value));
+$('corner').addEventListener('change',e=>current().radius=Number(e.target.value));
+$('center').onclick=()=>{current().panX=0;current().panY=0;draw()};
+$('clear').onclick=()=>{if(current().img)URL.revokeObjectURL(current().img);current().img=null;draw()};
+function validatePiece(key){
+ const s=state[key];
+ if(!(Number.isFinite(s.width)&&s.width>=10&&s.width<=190&&Number.isFinite(s.height)&&s.height>=10&&s.height<=270&&Number.isFinite(s.radius)&&s.radius>=0&&s.radius<=Math.min(s.width,s.height)/2)){
+  alert('Revisa las dimensiones y el radio. Ancho: 10–190 mm; alto: 10–270 mm; radio: hasta la mitad del lado menor.');return false;
+ }
+ if(s.width>190||s.height>270){alert('La pieza no cabe en A4 con los márgenes reservados.');return false;}
+ return true;
 }
-$('export').onclick=()=>{
- const s=current();if(!s.img)return alert('Primero sube una imagen para esta tapa.');
- const W=1800,H=900,c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');
- const path=new Path2D();
- if(active==='top'){path.roundRect(30,30,1740,840,[115,115,70,70]);}
- else{path.moveTo(70,30);path.lineTo(1730,30);path.quadraticCurveTo(1770,30,1770,75);path.lineTo(1770,825);path.quadraticCurveTo(1770,870,1730,870);path.lineTo(70,870);path.quadraticCurveTo(30,870,30,825);path.lineTo(30,75);path.quadraticCurveTo(30,30,70,30);path.closePath();}
- ctx.save();ctx.clip(path);const im=new Image();im.onload=()=>{const scale=Math.max(W/im.width,H/im.height)*s.zoom/100;const iw=im.width*scale,ih=im.height*scale;ctx.translate(W/2+s.x*W/390,H/2+s.y*H/200);ctx.rotate(s.rotate*Math.PI/180);ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();const a=document.createElement('a');a.download='2ds-custom-'+active+'.png';a.href=c.toDataURL('image/png');a.click()};im.onerror=()=>alert('No se pudo cargar la imagen.');im.src=s.img;
+function makePieceCanvas(key){
+ const s=state[key],W=Math.round(s.width*10),H=Math.round(s.height*10),c=document.createElement('canvas');
+ c.width=W;c.height=H;const ctx=c.getContext('2d'),r=Math.min(s.radius*10,W/2,H/2);
+ ctx.save();ctx.beginPath();ctx.roundRect(0,0,W,H,r);ctx.clip();
+ if(s.img){
+  const img=new Image();
+  return new Promise((resolve,reject)=>{
+   img.onload=()=>{
+    const base=Math.max(W/img.width,H/img.height),scale=base*s.zoom/100;
+    const iw=img.width*scale,ih=img.height*scale;
+    ctx.translate(W/2+s.panX/100*W,H/2+s.panY/100*H);
+    ctx.rotate(s.rotate*Math.PI/180);ctx.drawImage(img,-iw/2,-ih/2,iw,ih);ctx.restore();resolve(c);
+   };
+   img.onerror=()=>reject(new Error('No se pudo cargar la imagen.'));
+   img.src=s.img;
+  });
+ }
+ ctx.restore();return Promise.resolve(c);
+}
+async function addPdfPage(pdf,key){
+ const s=state[key];if(!validatePiece(key))throw new Error('Medidas inválidas.');
+ const canvas=await makePieceCanvas(key),pageW=210,pageH=297;
+ const x=(pageW-s.width)/2,y=105-s.height/2;
+ pdf.setFont('helvetica','bold');pdf.setFontSize(14);pdf.text('2DS CUSTOM STUDIO - '+key.toUpperCase(),12,14);
+ pdf.setFont('helvetica','normal');pdf.setFontSize(9);
+ pdf.text('New Nintendo 2DS XL · JAN-001 · plantilla ajustable',12,21);
+ pdf.addImage(canvas.toDataURL('image/png'),'PNG',x,y,s.width,s.height,undefined,'FAST');
+ pdf.setDrawColor(30,30,30);pdf.setLineWidth(0.25);pdf.setLineDashPattern([],0);
+ pdf.roundedRect(x,y,s.width,s.height,Math.min(s.radius,s.width/2,s.height/2),Math.min(s.radius,s.width/2,s.height/2),'S');
+ pdf.setFontSize(8);pdf.text('Tamaño configurado: '+s.width+' × '+s.height+' mm · Radio: '+s.radius+' mm',12,235);
+ pdf.setLineWidth(0.35);pdf.line(12,258,62,258);pdf.line(12,255,12,261);pdf.line(62,255,62,261);
+ pdf.text('Esta línea debe medir exactamente 50 mm',12,265);
+ pdf.setFontSize(8);pdf.text('IMPRIMIR AL 100% · DESACTIVAR “AJUSTAR A PÁGINA”',12,279);
+ pdf.setFontSize(7);pdf.text('Contorno genérico redondeado. Verificar sobre papel antes de cortar vinilo.',12,285);
+}
+async function exportPdf(keys){
+ if(!window.jspdf){alert('No se pudo cargar jsPDF. Comprueba tu conexión e inténtalo de nuevo.');return;}
+ try{
+  const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  for(let i=0;i<keys.length;i++){if(i>0)pdf.addPage();await addPdfPage(pdf,keys[i]);}
+  pdf.save(keys.length===2?'2DS-Custom-Studio-TOP-BOTTOM.pdf':'2DS-Custom-Studio-'+keys[0].toUpperCase()+'.pdf');
+ }catch(err){alert(err.message||'No se pudo crear el PDF.');}
+}
+$('pdfBoth').onclick=()=>exportPdf(['top','bottom']);
+$('pdfOne').onclick=()=>exportPdf([active]);
+$('png').onclick=async()=>{
+ try{
+  const c=await makePieceCanvas(active),a=document.createElement('a');
+  a.download='2DS-Custom-Studio-'+active.toUpperCase()+'.png';a.href=c.toDataURL('image/png');a.click();
+ }catch(err){alert(err.message||'No se pudo exportar el PNG.');}
 };
-$('exportPdf').onclick=()=>{const s=current();if(!s.img)return alert('Primero sube una imagen para esta tapa.');if(!window.jspdf)return alert('No se pudo cargar el generador PDF. Comprueba tu conexión.');const W=1800,H=900,c=document.createElement('canvas');c.width=W;c.height=H;const ctx=c.getContext('2d');const path=new Path2D();if(active==='top'){path.roundRect(30,30,1740,840,[115,115,70,70]);}else{path.moveTo(70,30);path.lineTo(1730,30);path.quadraticCurveTo(1770,30,1770,75);path.lineTo(1770,825);path.quadraticCurveTo(1770,870,1730,870);path.lineTo(70,870);path.quadraticCurveTo(30,870,30,825);path.lineTo(30,75);path.quadraticCurveTo(30,30,70,30);path.closePath();}ctx.save();ctx.clip(path);const im=new Image();im.onload=()=>{const scale=Math.max(W/im.width,H/im.height)*s.zoom/100,iw=im.width*scale,ih=im.height*scale;ctx.translate(W/2+s.x*W/390,H/2+s.y*H/200);ctx.rotate(s.rotate*Math.PI/180);ctx.drawImage(im,-iw/2,-ih/2,iw,ih);ctx.restore();const width=Number($('printWidth').value),height=Number($('printHeight').value);if(!(width>=10&&height>=10&&width<=200&&height<=200))return alert('Introduce medidas entre 10 y 200 mm.');const pdf=new window.jspdf.jsPDF({orientation:'portrait',unit:'mm',format:'a4'});const x=(210-width)/2,y=(297-height)/2;pdf.setFontSize(11);pdf.text('New Nintendo 2DS XL - '+active.toUpperCase(),12,12);pdf.addImage(c.toDataURL('image/png'),'PNG',x,y,width,height,undefined,'FAST');pdf.setDrawColor(120);pdf.setLineDashPattern([2,2],0);pdf.rect(x,y,width,height);pdf.setLineDashPattern([],0);pdf.setFontSize(8);pdf.text('Imprimir al 100% / tamaño real. Desactivar ajustar a página.',12,285);pdf.text('Medida configurada: '+width+' x '+height+' mm. Verificar con prueba en papel.',12,290);pdf.save('2ds-custom-'+active+'.pdf');};im.onerror=()=>alert('No se pudo cargar la imagen.');im.src=s.img;};
-draw();
-</script></body></html>
+draw();syncFields();
+</script>
+</body>
+</html>
